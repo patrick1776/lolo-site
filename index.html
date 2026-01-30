@@ -1,1 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLO | Professional Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600&family=Noto+Sans+TC:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', 'Noto Sans TC', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+        }
+        .img-container {
+            overflow: hidden;
+            aspect-ratio: 3 / 4;
+            background: #111;
+        }
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .img-container:hover img {
+            transform: scale(1.05);
+        }
+        .nav-glass {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
 
+    <nav class="fixed w-full z-50 nav-glass border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
+            <span class="text-xl font-light tracking-[0.4em]">LOLO</span>
+            <div class="flex space-x-8 text-[10px] tracking-[0.2em]">
+                <a href="https://www.instagram.com/lolo7925/" target="_blank" class="hover:text-gray-400 transition">INSTAGRAM</a>
+                <a href="#contact" class="hover:text-gray-400 transition">CONTACT</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col items-center justify-center px-6">
+        <div class="mb-12">
+            <img src="images/avatar.jpg" alt="LOLO Profile" 
+                 class="w-32 h-32 md:w-44 md:h-44 rounded-full object-cover border border-white/10 p-1 grayscale hover:grayscale-0 transition duration-700">
+        </div>
+        <h1 class="text-5xl md:text-7xl font-extralight tracking-[0.2em] mb-4">LOLO</h1>
+        <p class="text-gray-500 text-[10px] md:text-xs tracking-[0.8em] uppercase">Visual Content Creator</p>
+    </section>
+
+    <section id="work" class="max-w-7xl mx-auto pb-32 px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="space-y-4">
+                <div class="img-container">
+                    <img src="images/work1.jpg" alt="Work 01">
+                </div>
+                <p class="text-[9px] tracking-[0.3em] text-gray-600 uppercase">Archive / 01</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="img-container">
+                    <img src="images/work2.jpg" alt="Work 02">
+                </div>
+                <p class="text-[9px] tracking-[0.3em] text-gray-600 uppercase">Archive / 02</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="img-container">
+                    <img src="images/work3.jpg" alt="Work 03">
+                </div>
+                <p class="text-[9px] tracking-[0.3em] text-gray-600 uppercase">Archive / 03</p>
+            </div>
+
+        </div>
+    </section>
+
+    <footer id="contact" class="py-24 border-t border-white/5 text-center">
+        <h2 class="text-sm tracking-[0.4em] text-gray-500 mb-8 uppercase">Collaborate With</h2>
+        <a href="mailto:lolo7925@example.com" class="text-2xl md:text-4xl font-light hover:text-gray-400 transition underline underline-offset-16 decoration-1">lolo7925.studio@gmail.com</a>
+        <p class="mt-24 text-[9px] text-gray-800 tracking-widest uppercase">&copy; 2026 LOLO ALL RIGHTS RESERVED.</p>
+    </footer>
+
+</body>
+</html>
