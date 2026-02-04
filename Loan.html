@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貸款還款試算表 (修正版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        input:focus { outline: none; border-color: #06b6d4; box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2); }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-50 font-sans min-h-screen selection:bg-cyan-500 selection:text-white">
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+        <header class="mb-8 border-b border-slate-700 pb-6 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    貸款還款試算表
+                </h1>
+                <p class="text-slate-400 mt-2 text-sm">Professional Loan Amortization Schedule</p>
+            </div>
+            <div class="mt-4 md:mt-0 px-4 py-2 bg-slate-800 rounded-full border border-slate-700 text-xs text-cyan-400">
+                V 2.1.0 | Fixed & Optimized
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-xl font-semibold mb-6 text-cyan-400 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        參數設定
+                    </h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">貸款總額 (TWD)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-slate-500">$</span>
+                                <input type="text" id="loanAmount" value="1,000,000" onblur="formatInputOnBlur(this)" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2 pl-8 pr-3 text-white font-mono">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">年利率 (%)</label>
+                                <input type="number" id="annualRate" value="2.10" step="0.01" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2 px-3 text-white font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">期限 (年)</label>
+                                <input type="number" id="loanYears" value="20" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2 px-3 text-white font-mono">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">還款方式</label>
+                            <select id="method" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2 px-3 text-white">
+                                <option value="fixedTotal">本息平均攤還 (每月定額)</option>
+                                <option value="fixedPrincipal">本金平均攤還 (本金定額)</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-sm font-medium text-slate-300">啟用寬限期</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="useGrace" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                                </label>
+                            </div>
+                            <div id="graceInputContainer" class="hidden mt-2">
+                                <label class="block text-xs text-slate-500 mb-1">寬限期 (月)</label>
+                                <input type="number" id="graceMonths" placeholder="例如: 36" class="w-full bg-slate-900 border border-slate-600 rounded py-1.5 px-3 text-sm text-white focus:border-cyan-500">
+                            </div>
+                        </div>
+
+                        <button id="calcBtn" onclick="calculateSafe()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-cyan-500/30 transition-all transform active:scale-95">
+                            開始運算
+                        </button>
+                        <div id="errorMsg" class="hidden text-red-400 text-sm text-center font-bold bg-red-900/20 p-2 rounded"></div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border-t-4 border-t-green-500">
+                    <h2 class="text-lg font-semibold mb-4 text-white">匯出 Excel</h2>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="exportType" value="monthly" checked class="text-green-500 bg-slate-800 border-slate-600 focus:ring-green-500">
+                            <span class="ml-2 text-sm text-slate-300">按月詳表</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="exportType" value="yearly" class="text-green-500 bg-slate-800 border-slate-600 focus:ring-green-500">
+                            <span class="ml-2 text-sm text-slate-300">按年彙總</span>
+                        </label>
+                    </div>
+                    <button onclick="exportExcelSafe()" class="w-full flex items-center justify-center space-x-2 bg-green-700 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition-colors border border-green-500/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>下載 Excel 報表</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl h-[600px] flex flex-col">
+                    <div class="p-4 bg-slate-800/80 border-b border-slate-700 flex justify-between items-center shrink-0">
+                        <h3 class="font-bold text-lg text-slate-200">還款試算結果</h3>
+                        <span id="summaryText" class="text-xs text-cyan-400 font-mono">請點擊運算</span>
+                    </div>
+                    
+                    <div class="overflow-auto flex-1 p-0 custom-scrollbar">
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="bg-slate-900/90 text-slate-400 uppercase text-xs sticky top-0 z-10 backdrop-blur-md shadow-sm">
+                                <tr>
+                                    <th class="p-4 font-semibold whitespace-nowrap">期數</th>
+                                    <th class="p-4 font-semibold text-right whitespace-nowrap">本金還款</th>
+                                    <th class="p-4 font-semibold text-right whitespace-nowrap">利息支出</th>
+                                    <th class="p-4 font-semibold text-right whitespace-nowrap">本息合計</th>
+                                    <th class="p-4 font-semibold text-right whitespace-nowrap">剩餘餘額</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultBody" class="divide-y divide-slate-800 text-sm font-mono text-slate-300">
+                                <tr>
+                                    <td colspan="5" class="p-10 text-center text-slate-600">
+                                        等待輸入數據...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. UI 互動與輸入處理 ---
+        
+        // 切換寬限期輸入框顯示
+        document.getElementById('useGrace').addEventListener('change', function() {
+            const container = document.getElementById('graceInputContainer');
+            if(this.checked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('graceMonths').value = ''; // 清空
+            }
+        });
+
+        // 修正後的輸入格式化：只在「離開焦點 (Blur)」時格式化，避免輸入時游標亂跳
+        function formatInputOnBlur(input) {
+            let value = input.value.replace(/,/g, '').replace(/[^0-9]/g, '');
+            if (value === '') return;
+            // 轉換為數字再加逗點
+            const num = parseInt(value, 10);
+            if (!isNaN(num)) {
+                input.value = num.toLocaleString('en-US');
+            } else {
+                input.value = '';
+            }
+        }
+
+        // 輔助函式：數字轉千分位字串
+        const fmt = (num) => Math.round(num).toLocaleString('en-US');
+
+        // 全域變數儲存計算結果
+        let lastCalc = null;
+
+        // --- 2. 核心計算邏輯 (含防呆) ---
+        function calculateSafe() {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.classList.add('hidden');
+            errorDiv.innerText = '';
+
+            try {
+                // 讀取並清理輸入值
+                const rawAmount = document.getElementById('loanAmount').value.replace(/,/g, '');
+                if (!rawAmount) throw new Error("請輸入貸款總額");
+                
+                const amount = new Decimal(rawAmount);
+                const annualRateVal = document.getElementById('annualRate').value;
+                if (annualRateVal === '') throw new Error("請輸入年利率");
+                const annualRate = new Decimal(annualRateVal).div(100);
+                
+                const yearsVal = document.getElementById('loanYears').value;
+                if (!yearsVal) throw new Error("請輸入貸款年限");
+                const years = parseInt(yearsVal);
+                
+                const totalMonths = years * 12;
+                const method = document.getElementById('method').value;
+                
+                const useGrace = document.getElementById('useGrace').checked;
+                let graceMonths = 0;
+                if (useGrace) {
+                    const graceVal = document.getElementById('graceMonths').value;
+                    if (!graceVal) throw new Error("請輸入寬限期月數");
+                    graceMonths = parseInt(graceVal);
+                }
+
+                // 邏輯檢查
+                if (graceMonths >= totalMonths) throw new Error("寬限期不能大於或等於貸款總年限！");
+
+                const monthlyRate = annualRate.div(12);
+                const repaymentMonths = totalMonths - graceMonths;
+
+                let schedule = [];
+                let remainingBalance = amount;
+                let totalInterest = new Decimal(0);
+
+                // 開始迴圈計算
+                for (let m = 1; m <= totalMonths; m++) {
+                    let interest = remainingBalance.mul(monthlyRate);
+                    let principal = new Decimal(0);
+
+                    if (m <= graceMonths) {
+                        // 寬限期：只繳息，本金為 0
+                        principal = new Decimal(0);
+                    } else {
+                        // 還款期
+                        if (method === 'fixedTotal') {
+                            // 本息平均攤還
+                            if (monthlyRate.toNumber() === 0) {
+                                principal = amount.div(repaymentMonths);
+                            } else {
+                                // PMT 公式: P * r * (1+r)^n / ((1+r)^n - 1)
+                                let ratePlusOne = monthlyRate.add(1);
+                                let powVal = ratePlusOne.pow(repaymentMonths);
+                                let numerator = amount.mul(monthlyRate).mul(powVal);
+                                let denominator = powVal.sub(1);
+                                let pmt = numerator.div(denominator);
+                                principal = pmt.sub(interest);
+                            }
+                        } else {
+                            // 本金平均攤還
+                            principal = amount.div(repaymentMonths);
+                        }
+                    }
+
+                    // 邊界修正
+                    if (principal.gt(remainingBalance) || m === totalMonths) {
+                        principal = remainingBalance;
+                    }
+                    if (principal.lt(0)) principal = new Decimal(0); // 防呆
+
+                    remainingBalance = remainingBalance.sub(principal);
+                    totalInterest = totalInterest.add(interest);
+
+                    // 存入陣列 (轉為 Number 方便顯示)
+                    schedule.push({
+                        month: m,
+                        year: Math.ceil(m / 12),
+                        principal: principal.toNumber(),
+                        interest: interest.toNumber(),
+                        total: principal.add(interest).toNumber(),
+                        balance: remainingBalance.toNumber()
+                    });
+                }
+
+                // 儲存結果供匯出使用
+                lastCalc = {
+                    amount: amount.toNumber(),
+                    annualRate: annualRate.toNumber(),
+                    years,
+                    totalMonths,
+                    graceMonths,
+                    method,
+                    schedule
+                };
+
+                updateUI(schedule);
+
+            } catch (e) {
+                console.error(e);
+                errorDiv.innerText = "錯誤: " + e.message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        // --- 3. 更新畫面表格 ---
+        function updateUI(schedule) {
+            const tbody = document.getElementById('resultBody');
+            tbody.innerHTML = ''; // 清空
+
+            const exportType = document.querySelector('input[name="exportType"]:checked').value;
+            let displayData = [];
+
+            if (exportType === 'yearly') {
+                // 依年份加總
+                let yearMap = {};
+                schedule.forEach(d => {
+                    if (!yearMap[d.year]) {
+                        yearMap[d.year] = { year: d.year, principal: 0, interest: 0, total: 0, balance: 0 };
+                    }
+                    yearMap[d.year].principal += d.principal;
+                    yearMap[d.year].interest += d.interest;
+                    yearMap[d.year].total += d.total;
+                    yearMap[d.year].balance = d.balance; // 當年最後一月的餘額
+                });
+                displayData = Object.values(yearMap);
+            } else {
+                displayData = schedule;
+            }
+
+            // 渲染表格 (若是詳細月表，為了效能限制顯示前 200 筆，提示下載看全部)
+            const maxRows = exportType === 'monthly' ? 240 : 100;
+            
+            displayData.slice(0, maxRows).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50 transition-colors border-b border-slate-800";
+                
+                const label = exportType === 'yearly' ? `第 ${row.year} 年` : `第 ${row.month} 期`;
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-cyan-400 font-medium">${label}</td>
+                    <td class="px-4 py-3 text-right text-emerald-400">${fmt(row.principal)}</td>
+                    <td class="px-4 py-3 text-right text-rose-400">${fmt(row.interest)}</td>
+                    <td class="px-4 py-3 text-right text-slate-200 font-bold">${fmt(row.total)}</td>
+                    <td class="px-4 py-3 text-right text-slate-500">${fmt(row.balance)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (displayData.length > maxRows) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="5" class="p-4 text-center text-yellow-500 text-xs">... 還有更多資料，請下載 Excel 查看完整明細 ...</td>`;
+                tbody.appendChild(tr);
+            }
+
+            // 更新總結文字
+            const totalInt = schedule.reduce((sum, item) => sum + item.interest, 0);
+            document.getElementById('summaryText').innerText = `總利息支出: ${fmt(totalInt)} TWD`;
+        }
+
+        // 監聽 Radio 切換，若已計算過則自動重繪表格
+        document.querySelectorAll('input[name="exportType"]').forEach(el => {
+            el.addEventListener('change', () => {
+                if (lastCalc) updateUI(lastCalc.schedule);
+            });
+        });
+
+        // --- 4. 匯出 Excel (含公式) ---
+        async function exportExcelSafe() {
+            if (!lastCalc) {
+                alert('請先點擊「開始運算」產生數據後再下載。');
+                return;
+            }
+
+            try {
+                const wb = new ExcelJS.Workbook();
+                const ws = wb.addWorksheet('還款試算表');
+                const exportType = document.querySelector('input[name="exportType"]:checked').value;
+
+                // 樣式設定
+                const titleStyle = { font: { size: 16, bold: true, color: { argb: 'FFFFFFFF' } }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } } };
+                const headerStyle = { font: { bold: true, color: { argb: 'FFFFFFFF' } }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0891B2' } }, alignment: { horizontal: 'center' } };
+                const numFmt = '#,##0'; // 整數+千分位
+
+                // --- 寫入參數區 (供公式引用) ---
+                ws.getCell('A1').value = '參數區 (公式依據)';
+                ws.getCell('A1').font = { bold: true };
+
+                const params = [
+                    ['貸款金額 (PV)', lastCalc.amount],
+                    ['年利率', lastCalc.annualRate],
+                    ['總期數 (N)', lastCalc.totalMonths],
+                    ['寬限期 (G)', lastCalc.graceMonths],
+                    ['實際還款期 (N-G)', lastCalc.totalMonths - lastCalc.graceMonths],
+                    ['月利率 (r)', { formula: 'B3/12' }],
+                    ['固定月付額 (PMT)', { formula: 'IF(B5=0, B2/B6, -PMT(B3/12, B6, B2))' }] // 注意 PMT 在 Excel 為負，在此我們取值邏輯處理
+                ];
+
+                params.forEach((p, i) => {
+                    const row = i + 2;
+                    ws.getCell(`A${row}`).value = p[0];
+                    ws.getCell(`B${row}`).value = p[1];
+                });
+
+                // 格式設定
+                ws.getCell('B2').numFmt = '#,##0';
+                ws.getCell('B3').numFmt = '0.00%';
+                ws.getCell('B7').numFmt = '0.00%';
+
+                // --- 建立表頭 ---
+                const startRow = 10;
+                ws.getCell(`A${startRow}`).value = '貸款還款試算表';
+                ws.mergeCells(`A${startRow}:E${startRow}`);
+                ws.getCell(`A${startRow}`).style = titleStyle;
+                ws.getCell(`A${startRow}`).alignment = { horizontal: 'center' };
+
+                const headerRow = ws.getRow(startRow + 1);
+                headerRow.values = [
+                    exportType === 'yearly' ? '年度' : '期數', 
+                    '本金還款', '利息支出', '本息合計', '期末餘額'
+                ];
+                headerRow.eachCell(c => c.style = headerStyle);
+
+                // --- 填入資料與公式 ---
+                if (exportType === 'monthly') {
+                    for (let i = 1; i <= lastCalc.totalMonths; i++) {
+                        const r = startRow + 1 + i;
+                        const row = ws.getRow(r);
+                        
+                        // A欄: 期數
+                        row.getCell(1).value = i;
+                        
+                        const prevBalRef = (i === 1) ? '$B$2' : `E${r-1}`;
+
+                        // C欄: 利息 (期初餘額 * 月利率)
+                        row.getCell(3).value = { formula: `ROUND(${prevBalRef}*$B$7, 0)` };
+
+                        // B欄: 本金
+                        // Excel 公式邏輯：若在寬限期內則為 0，否則依據還款法計算
+                        if (lastCalc.method === 'fixedTotal') {
+                            // 本息平均攤還：使用 PPMT 函數
+                            // =IF(期數<=寬限, 0, -PPMT(月利, 期數-寬限, 還款期數, 貸款額))
+                            // 注意 PPMT 回傳為負值，故加負號轉正
+                            row.getCell(2).value = { 
+                                formula: `IF(A${r}<=$B$5, 0, ROUND(-PPMT($B$7, A${r}-$B$5, $B$6, $B$2), 0))`
+                            };
+                        } else {
+                            // 本金平均攤還
+                            row.getCell(2).value = { 
+                                formula: `IF(A${r}<=$B$5, 0, ROUND($B$2/$B$6, 0))` 
+                            };
+                        }
+
+                        // D欄: 合計
+                        row.getCell(4).value = { formula: `B${r}+C${r}` };
+
+                        // E欄: 餘額
+                        row.getCell(5).value = { formula: `${prevBalRef}-B${r}` };
+
+                        // 格式化
+                        [2,3,4,5].forEach(idx => row.getCell(idx).numFmt = numFmt);
+                    }
+                } else {
+                    // 年度報表
+                    ws.getCell(`A${startRow-1}`).value = "註：年度報表為數值彙總，若需詳細公式運算請下載「按月詳表」。";
+                    ws.getCell(`A${startRow-1}`).font = { color: { argb: 'FFF59E0B' } };
+
+                    // 重新聚合，但這次我們直接填入數值，因為年度公式動態性太高容易出錯
+                    let yearMap = {};
+                    lastCalc.schedule.forEach(d => {
+                        if (!yearMap[d.year]) yearMap[d.year] = { p:0, i:0, t:0, b:0 };
+                        yearMap[d.year].p += d.principal;
+                        yearMap[d.year].i += d.interest;
+                        yearMap[d.year].t += d.total;
+                        yearMap[d.year].b = d.balance;
+                    });
+
+                    let rowIndex = startRow + 2;
+                    for (const [year, data] of Object.entries(yearMap)) {
+                        const row = ws.getRow(rowIndex);
+                        row.getCell(1).value = parseInt(year);
+                        row.getCell(2).value = Math.round(data.p);
+                        row.getCell(3).value = Math.round(data.i);
+                        row.getCell(4).value = { formula: `B${rowIndex}+C${rowIndex}` }; // 合計用公式
+                        row.getCell(5).value = Math.round(data.b);
+                        
+                        [2,3,4,5].forEach(idx => row.getCell(idx).numFmt = numFmt);
+                        rowIndex++;
+                    }
+                }
+
+                // 設定欄寬
+                ws.columns = [{ width: 10 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 22 }];
+
+                // 產生檔案
+                const buffer = await wb.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `貸款試算_${exportType === 'monthly' ? '月報表' : '年報表'}.xlsx`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+            } catch (e) {
+                console.error(e);
+                alert("Excel 匯出失敗: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
