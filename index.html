@@ -3,87 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOLO | Professional Portfolio</title>
+    <title>LOLO的工具箱 | Digital Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600&family=Noto+Sans+TC:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Montserrat', 'Noto Sans TC', sans-serif;
-            background-color: #050505;
-            color: #ffffff;
+        /* 自定義背景動畫 */
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .img-container {
-            overflow: hidden;
-            aspect-ratio: 3 / 4;
-            background: #111;
+        .animated-bg {
+            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f172a, #312e81);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
-        .img-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .img-container:hover img {
-            transform: scale(1.05);
-        }
-        .nav-glass {
-            background: rgba(5, 5, 5, 0.8);
+        /* 卡片懸停特效 */
+        .link-card {
+            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .link-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.3);
         }
     </style>
 </head>
-<body>
+<body class="animated-bg min-h-screen text-white font-sans flex flex-col items-center">
 
-    <nav class="fixed w-full z-50 nav-glass border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
-            <span class="text-xl font-light tracking-[0.4em]">LOLO</span>
-            <div class="flex space-x-8 text-[10px] tracking-[0.2em]">
-                <a href="https://www.instagram.com/lolo7925/" target="_blank" class="hover:text-gray-400 transition">INSTAGRAM</a>
-                <a href="#contact" class="hover:text-gray-400 transition">CONTACT</a>
-            </div>
+    <header class="w-full max-w-6xl mx-auto p-8 text-center">
+        <div class="mb-4 inline-block p-3 rounded-full bg-cyan-500/10 border border-cyan-400/30">
+            <i class="fa-solid fa-cube text-3xl text-cyan-400"></i>
         </div>
-    </nav>
+        <h1 class="text-3xl md:text-5xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-blue-500">
+            LOLO的工具箱
+        </h1>
+        <p class="text-slate-400 mt-2 text-sm md:text-base">Personal Digital Gateway</p>
+    </header>
 
-    <section class="min-h-screen flex flex-col items-center justify-center px-6">
-        <div class="mb-12">
-            <img src="images/avatar.jpg" alt="LOLO Profile" 
-                 class="w-32 h-32 md:w-44 md:h-44 rounded-full object-cover border border-white/10 p-1 grayscale hover:grayscale-0 transition duration-700">
+    <main class="w-full max-w-6xl mx-auto px-6 pb-20 flex-grow">
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+
+            <a href="https://www.lolorich.com/Loan" target="_blank" class="link-card group rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/20 blur-3xl rounded-full -mr-10 -mt-10 transition-all group-hover:bg-cyan-400/30"></div>
+                
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-calculator text-2xl text-white"></i>
+                </div>
+                
+                <h2 class="text-lg font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">LoloRich 貸款試算</h2>
+                <span class="text-xs text-slate-400 mt-1">房貸/信貸還款分析</span>
+            </a>
+
+            <a href="https://www.google.com" target="_blank" class="link-card group rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer">
+                <div class="w-14 h-14 rounded-full bg-slate-700/50 border border-slate-600 flex items-center justify-center mb-3 group-hover:bg-slate-600 transition-colors">
+                    <i class="fa-brands fa-google text-xl text-slate-300"></i>
+                </div>
+                <h2 class="text-base font-semibold text-slate-200">Google 搜尋</h2>
+            </a>
+
+            <a href="https://www.notion.so" target="_blank" class="link-card group rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer">
+                <div class="w-14 h-14 rounded-full bg-slate-700/50 border border-slate-600 flex items-center justify-center mb-3 group-hover:bg-slate-600 transition-colors">
+                    <i class="fa-solid fa-book-open text-xl text-slate-300"></i>
+                </div>
+                <h2 class="text-base font-semibold text-slate-200">Notion 筆記</h2>
+            </a>
+
+            <a href="https://tw.tradingview.com/" target="_blank" class="link-card group rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer">
+                <div class="w-14 h-14 rounded-full bg-slate-700/50 border border-slate-600 flex items-center justify-center mb-3 group-hover:bg-slate-600 transition-colors">
+                    <i class="fa-solid fa-chart-line text-xl text-slate-300"></i>
+                </div>
+                <h2 class="text-base font-semibold text-slate-200">TradingView</h2>
+            </a>
+
+            <div class="rounded-2xl p-6 flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-700/50 text-slate-600 select-none">
+                <i class="fa-solid fa-plus text-2xl mb-2"></i>
+                <span class="text-sm">預留位置</span>
+            </div>
+
         </div>
-        <h1 class="text-5xl md:text-7xl font-extralight tracking-[0.2em] mb-4">LOLO</h1>
-        <p class="text-gray-500 text-[10px] md:text-xs tracking-[0.8em] uppercase">Visual Content Creator</p>
-    </section>
+    </main>
 
-    <section id="work" class="max-w-7xl mx-auto pb-32 px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <div class="space-y-4">
-                <div class="img-container">
-                    <img src="images/work1.jpg" alt="Work 01">
-                </div>
-                <p class="text-[9px] tracking-[0.3em] text-gray-600 uppercase">Archive / 01</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="img-container">
-                    <img src="images/work2.jpg" alt="Work 02">
-                </div>
-                <p class="text-[9px] tracking-[0.3em] text-gray-600 uppercase">Archive / 02</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="img-container">
-                    <img src="images/work3.jpg" alt="Work 03">
-                </div>
-                <p class="text-[9px] tracking-[0.3em] text-gray-600 uppercase">Archive / 03</p>
-            </div>
-
-        </div>
-    </section>
-
-    <footer id="contact" class="py-24 border-t border-white/5 text-center">
-        <h2 class="text-sm tracking-[0.4em] text-gray-500 mb-8 uppercase">Collaborate With</h2>
-        <a href="mailto:lolo7925@example.com" class="text-2xl md:text-4xl font-light hover:text-gray-400 transition underline underline-offset-16 decoration-1">lolo7925.studio@gmail.com</a>
-        <p class="mt-24 text-[9px] text-gray-800 tracking-widest uppercase">&copy; 2026 LOLO ALL RIGHTS RESERVED.</p>
+    <footer class="w-full text-center py-6 text-slate-500 text-xs border-t border-slate-800/50 bg-slate-900/50 backdrop-blur-sm">
+        <p>&copy; 2026 LOLO's Toolbox. All Rights Reserved.</p>
     </footer>
 
 </body>
