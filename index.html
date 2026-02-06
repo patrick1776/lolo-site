@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的小型 CRM</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .form-group { margin-bottom: 10px; }
+        input { padding: 8px; width: 200px; }
+        button { padding: 8px 16px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2>客戶資料管理 (CRM)</h2>
+    
+    <div class="form-group">
+        <input type="text" id="name" placeholder="姓名">
+        <input type="text" id="phone" placeholder="電話">
+        <button onclick="addCustomer()">新增客戶</button>
+    </div>
+
+    <table id="customerTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>電話</th>
+                <th>建立時間</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <script>
+        // 請將此處替換為你正式部署後的 Worker 網址
+        const API_URL = 'https://my-crm-project.patrick1776.workers.dev/customers';
+
+        // 取得資料並渲染表格
+        async function fetchCustomers() {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            const tbody = document.querySelector('#customerTable tbody');
+            tbody.innerHTML = data.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.name}</td>
+                    <td>${c.phone}</td>
+                    <td>${new Date(c.created_at).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 呼叫新增 API (此處需配合 Worker 的 POST 路由)
+        async function addCustomer() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ name, phone }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            alert('新增成功！');
+            fetchCustomers(); // 重新整理列表
+        }
+
+        // 初始載入
+        fetchCustomers();
+    </script>
+</body>
+</html>
